@@ -15,8 +15,10 @@ namespace Diplom
 {
     public partial class SearchVerse : Form
     {
+        int le123;
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
+        Dictionary<string, string[]> Slogs = new Dictionary<string, string[]>();
         public SearchVerse()
         {
             InitializeComponent();
@@ -32,29 +34,38 @@ namespace Diplom
             StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
             string file = reader.ReadToEnd();
             file = ReplaceNR(file);
-            WordsAccent = file.Split(' ');
-            WordsAccent = WordsAccent.Where(x => x != "").ToArray();
+            WordsAccent = file.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             /////////////////////////////////////////////////////
             reader.Close();
             fs.Close();
-            /////////////////////Загрузка словаря слогов////////////////////////
-            string A = "Slovar_udareny.txt";
-            FileStream fs = new FileStream(path + A, FileMode.Open);
-            StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
-            string file = reader.ReadToEnd();
-            file = ReplaceNR(file);
-            WordsAccent = file.Split(' ');
-            WordsAccent = WordsAccent.Where(x => x != "").ToArray();
+            
+            string[] ss = FormateSlog("Множество");
+            
 
         }
 
         private void button2_Click(object sender, EventArgs e)//Найти стихи >>
         {
+            if(SourseText.Text == "")
+            {
+                MessageBox.Show("Введите исходный текст пожалуйста!",
+                    "Information!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
             string Sourse;
             Sourse = SourseText.Text;
             Words = Sourse.Split(' ');
             ////////////////////////////
-
+            DictionarySlogs();
+            foreach (KeyValuePair<string, string[]> keyValue in Slogs)
+            {
+                Stix.Text += keyValue.Key + " /// ";
+                for(int i = 0; i < keyValue.Value.Length; i++)
+                {
+                    Stix.Text += " " + keyValue.Value[i];
+                }
+            }
+            string sed = "";
         }
 
         private void OpenText_Click(object sender, EventArgs e)
@@ -73,13 +84,61 @@ namespace Diplom
             }
         }
 
-        private string ReplaceNR(string file)//Убирание новой строки и кареток \n & \r
+              
+
+        ////////Убирание новой строки и кареток \n & \r//////////////////
+        private string ReplaceNR(string file)
         {
             var ReN = new Regex("\n");
             var ReR = new Regex("\r");
             file = ReN.Replace(file, "");
             file = ReR.Replace(file, "");
             return file;
+        }
+
+        /////////////////////Формирование словаря "слогов" (Разбиение по гласным)////////////////////////
+        public void DictionarySlogs()
+        {
+            for (int i=0; i < Words.Length; i++)
+            {
+                try
+                {
+                    Slogs.Add(Words[i], FormateSlog(Words[i]));
+                }
+                catch (System.ArgumentException) { continue; }
+            }
+        }
+
+
+        /////////////////////Формирование "слогов" (Разбиение по гласным)////////////////////////
+        public static string[] FormateSlog(string word)
+        {
+            string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
+            List<int> glasIndexes = new List<int>();
+            for (int i = 0; i < word.Length; i++)
+            {
+                string symbol = word.Substring(i, 1);
+                for (int j = 0; j < glas.Length; j++)
+                {
+                    if (symbol == glas[j])
+                    {
+                        glasIndexes.Add(i);
+                        break;
+                    }
+                }
+            }
+            string result = string.Empty;
+            for (int i = glasIndexes.Count - 1; i > 0; i--)
+            {
+                if (glasIndexes[i] - glasIndexes[i - 1] == 1)
+                    continue;
+                int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
+                result = "-" + word.Substring(glasIndexes[i - 1] + 1 + n / 2) + result;
+                word = word.Remove(glasIndexes[i - 1] + 1 + n / 2);
+            }
+            result = word + result;
+            string[] slogs = result.Split('-'); 
+            return slogs;
         }
 
     }

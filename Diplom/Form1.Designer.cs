@@ -31,7 +31,7 @@
             this.SourseText = new System.Windows.Forms.RichTextBox();
             this.OpenText = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.Stix = new System.Windows.Forms.RichTextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.HELPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AboutAutorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,13 +68,13 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // richTextBox1
+            // Stix
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(402, 31);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(300, 326);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "";
+            this.Stix.Location = new System.Drawing.Point(402, 31);
+            this.Stix.Name = "Stix";
+            this.Stix.Size = new System.Drawing.Size(300, 326);
+            this.Stix.TabIndex = 3;
+            this.Stix.Text = "";
             // 
             // menuStrip1
             // 
@@ -109,7 +109,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(714, 369);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.Stix);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.OpenText);
             this.Controls.Add(this.SourseText);
@@ -129,7 +129,7 @@
         private System.Windows.Forms.RichTextBox SourseText;
         private System.Windows.Forms.Button OpenText;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox Stix;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem HELPToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem AboutAutorToolStripMenuItem;
