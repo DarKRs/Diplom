@@ -15,10 +15,10 @@ namespace Diplom
 {
     public partial class SearchVerse : Form
     {
-        int le123;
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
-        Dictionary<string, string[]> Slogs = new Dictionary<string, string[]>();
+        Dictionary<string, word> WORD = new Dictionary<string, word>();
+        
         public SearchVerse()
         {
             InitializeComponent();
@@ -33,15 +33,51 @@ namespace Diplom
             FileStream fs = new FileStream(path + A, FileMode.Open);
             StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
             string file = reader.ReadToEnd();
+            Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>();//Словарь слов с ударениями(Формуриуется из БД при иницилизации)
             file = ReplaceNR(file);
-            WordsAccent = file.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            WordsAccent = file.Split(new char[] { ' ', '\n' , '\r' , '!' }, StringSplitOptions.RemoveEmptyEntries);
+            for(int i = 0; i < WordsAccent.Length-1; i++)
+            {
+                if (WordAccentDictionary.ContainsKey(WordsAccent[i]))
+                {
+                    i++;
+                    continue;
+                }
+                if(WordAccentDictionary.ContainsKey(WordsAccent[i] + " " + WordsAccent[i + 1]))
+                {
+                    i += 2;
+                    continue;
+                }
+                if (WordsAccent[i] == WordsAccent[i + 1] && !WordAccentDictionary.ContainsKey(WordsAccent[i]))
+                {
+                    //////////Слово без ударения/////////////
+                    WordAccentDictionary.Add(WordsAccent[i], WordsAccent[i + 1]);
+                    i++;
+                }
+                else if (WordsAccent[i + 1].Contains('\'') && !WordAccentDictionary.ContainsKey(WordsAccent[i]))
+                {
+                    WordAccentDictionary.Add(WordsAccent[i], WordsAccent[i + 1]);
+                    i++;
+                }
+                else
+                {
+                    ////////////////////////////Словочетание///////////////////////
+                    WordAccentDictionary.Add(WordsAccent[i]+" " +  WordsAccent[i + 1], WordsAccent[i + 2] + " " + WordsAccent[i + 3]);
+                    i += 2;
+                }
+                
+            }
             /////////////////////////////////////////////////////
             reader.Close();
             fs.Close();
-            
-            string[] ss = FormateSlog("Множество");
-            
+          /*  string text = "";
+            foreach (KeyValuePair<string, string> keyValue in WordAccentDictionary)
+            {
 
+                text += keyValue.Key + " -- " + keyValue.Value + " \n";
+
+            }
+            Stix.Text += text + " \n";*/
         }
 
         private void button2_Click(object sender, EventArgs e)//Найти стихи >>
@@ -57,12 +93,12 @@ namespace Diplom
             Words = Sourse.Split(' ');
             ////////////////////////////
             DictionarySlogs();
-            foreach (KeyValuePair<string, string[]> keyValue in Slogs)
+            foreach (KeyValuePair<string, word> keyValue in WORD)
             {
                 Stix.Text += keyValue.Key + " /// ";
-                for(int i = 0; i < keyValue.Value.Length; i++)
+                for (int i = 0; i < keyValue.Value.slogs.Length; i++)
                 {
-                    Stix.Text += " " + keyValue.Value[i];
+                    Stix.Text += " " + keyValue.Value.slogs[i];
                 }
             }
             string sed = "";
@@ -99,19 +135,25 @@ namespace Diplom
         /////////////////////Формирование словаря "слогов" (Разбиение по гласным)////////////////////////
         public void DictionarySlogs()
         {
+            word[] wordDic = new word[Words.Length];
             for (int i=0; i < Words.Length; i++)
             {
                 try
                 {
-                    Slogs.Add(Words[i], FormateSlog(Words[i]));
+                    wordDic[i] = new word();
+                    wordDic[i].slogs = wordDic[i].FormateSlog(Words[i]);      
+                    WORD.Add(Words[i], wordDic[i]);
                 }
                 catch (System.ArgumentException) { continue; }
             }
         }
 
+        public void sa()
+        {
 
-        /////////////////////Формирование "слогов" (Разбиение по гласным)////////////////////////
-        public static string[] FormateSlog(string word)
+        }
+
+        public static string test(string word)
         {
             string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
             List<int> glasIndexes = new List<int>();
@@ -137,9 +179,9 @@ namespace Diplom
                 word = word.Remove(glasIndexes[i - 1] + 1 + n / 2);
             }
             result = word + result;
-            string[] slogs = result.Split('-'); 
-            return slogs;
+            return result;
         }
+
 
     }
 }
