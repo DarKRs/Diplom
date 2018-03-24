@@ -16,3 +16,13 @@ C:\Git\Diplom\Diplom\obj\Debug\Diplom.csprojResolveAssemblyReference.cache
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.SearchVerse.resources
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.Properties.Resources.resources
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.csproj.GenerateResource.Cache
+D:\Diplom\Diplom\bin\Debug\Diplom.exe.config
+D:\Diplom\Diplom\bin\Debug\Diplom.exe
+D:\Diplom\Diplom\bin\Debug\Diplom.pdb
+D:\Diplom\Diplom\obj\Debug\Diplom.csprojResolveAssemblyReference.cache
+D:\Diplom\Diplom\obj\Debug\Diplom.SearchVerse.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.Properties.Resources.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.csproj.GenerateResource.Cache
+D:\Diplom\Diplom\obj\Debug\Diplom.csproj.CoreCompileInputs.cache
+D:\Diplom\Diplom\obj\Debug\Diplom.exe
+D:\Diplom\Diplom\obj\Debug\Diplom.pdb

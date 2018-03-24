@@ -17,8 +17,8 @@ namespace Diplom
     {
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
-        Dictionary<string, word> WORD = new Dictionary<string, word>();
-        
+        Dictionary<string, word> WordDictionary = new Dictionary<string, word>();
+        Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);//Словарь слов с ударениями(Формуриуется из БД при иницилизации)
         public SearchVerse()
         {
             InitializeComponent();
@@ -33,7 +33,7 @@ namespace Diplom
             FileStream fs = new FileStream(path + A, FileMode.Open);
             StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
             string file = reader.ReadToEnd();
-            Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>();//Словарь слов с ударениями(Формуриуется из БД при иницилизации)
+            
             file = ReplaceNR(file);
             WordsAccent = file.Split(new char[] { ' ', '\n' , '\r' , '!' }, StringSplitOptions.RemoveEmptyEntries);
             for(int i = 0; i < WordsAccent.Length-1; i++)
@@ -70,7 +70,10 @@ namespace Diplom
             /////////////////////////////////////////////////////
             reader.Close();
             fs.Close();
-          /*  string text = "";
+           /* string ew = "ние";
+            string we = "Окончание";
+            we.EndsWith(ew);
+            string text = "";
             foreach (KeyValuePair<string, string> keyValue in WordAccentDictionary)
             {
 
@@ -82,6 +85,7 @@ namespace Diplom
 
         private void button2_Click(object sender, EventArgs e)//Найти стихи >>
         {
+            Stix.Clear();
             if(SourseText.Text == "")
             {
                 MessageBox.Show("Введите исходный текст пожалуйста!",
@@ -90,18 +94,23 @@ namespace Diplom
             }
             string Sourse;
             Sourse = SourseText.Text;
+            Sourse = ReplaceNR(Sourse);
             Words = Sourse.Split(' ');
+            Words = Words.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             ////////////////////////////
             DictionarySlogs();
-            foreach (KeyValuePair<string, word> keyValue in WORD)
+            foreach (KeyValuePair<string, word> keyValue in WordDictionary)
             {
                 Stix.Text += keyValue.Key + " /// ";
                 for (int i = 0; i < keyValue.Value.slogs.Length; i++)
                 {
                     Stix.Text += " " + keyValue.Value.slogs[i];
                 }
+                Stix.Text += " " + keyValue.Value.Accent + "\n";
             }
             string sed = "";
+            word lol = new word();
+            WordDictionary.Add("123", lol);
         }
 
         private void OpenText_Click(object sender, EventArgs e)
@@ -115,42 +124,86 @@ namespace Diplom
                 StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
                 string file = reader.ReadToEnd();
                 //////////////////////////////
-                file = ReplaceNR(file);
                 SourseText.Text = file;
             }
         }
 
               
 
-        ////////Убирание новой строки и кареток \n & \r//////////////////
+        ////////Обработка текста.Убирание новой строки и кареток \n & \r//////////////////
         private string ReplaceNR(string file)
         {
             var ReN = new Regex("\n");
             var ReR = new Regex("\r");
-            file = ReN.Replace(file, "");
-            file = ReR.Replace(file, "");
+            var ReT = new Regex("\"");
+            var ReY = new Regex("!");
+            var ReU = new Regex("-");
+            var ReI = new Regex(",");
+            var ReO = new Regex(":");
+            var ReP = new Regex("–");
+            var ReA = new Regex(@"\(");
+            var ReS = new Regex(@"\)");
+            var ReD = new Regex(@"\?");
+            var ReF = new Regex(";");
+            var ReG = new Regex(".");
+            file = ReN.Replace(file, " ");
+            file = ReR.Replace(file, " ");
+            file = ReT.Replace(file, " ");
+            file = ReY.Replace(file, " ");
+            file = ReU.Replace(file, " ");
+            file = ReI.Replace(file, " ");
+            file = ReO.Replace(file, " ");
+            file = ReP.Replace(file, " ");
+            file = ReA.Replace(file, " ");
+            file = ReS.Replace(file, " ");
+            file = ReD.Replace(file, " ");
+            file = ReF.Replace(file, " ");
+            file = ReG.Replace(file, "");
             return file;
         }
 
-        /////////////////////Формирование словаря "слогов" (Разбиение по гласным)////////////////////////
+        /////////////////////Формирование словаря слов. Слогов и удаорений ////////////////////////
         public void DictionarySlogs()
         {
             word[] wordDic = new word[Words.Length];
-            for (int i=0; i < Words.Length; i++)
+
+            for (int i = 0; i < Words.Length; i++)
             {
-                try
+                if (!WordDictionary.ContainsKey(Words[i]))
                 {
                     wordDic[i] = new word();
-                    wordDic[i].slogs = wordDic[i].FormateSlog(Words[i]);      
-                    WORD.Add(Words[i], wordDic[i]);
+                    wordDic[i].slogs = wordDic[i].FormateSlog(Words[i]);
+                    try { wordDic[i].Accent = WordAccentDictionary[Words[i]]; } //Находит ударение по ключу....По слову
+                    //Если такого ключа нет  проверяем на окончания. И опять ищем по ключу
+                    catch
+                    {
+                        string abWord = about(Words[i]);
+                        try { wordDic[i].Accent = WordAccentDictionary[abWord]; }
+                        catch { WordAccentDictionary.Add(Words[i], Words[i]); wordDic[i].Accent = WordAccentDictionary[Words[i]]; } //Добавление ЭТОГО же слова как слова с ударением т.к. некоторые слова безударные
+                        WordDictionary.Add(Words[i], wordDic[i]);
+                    }
                 }
-                catch (System.ArgumentException) { continue; }
             }
         }
 
-        public void sa()
+        //Проверка на ококончание
+        public static string about(string word)
         {
-
+            //Массив окончаний
+            string[] ThreeAbout = { "ать", "ять", "оть", "еть", "уть", "у", "ю", "ем", "ешь", "ете", "ет","ут","ют","ал","ял","ала","яла","али","яли","ул","ула","ули",
+                "а","я","о","е","ь","ы","и","ая","яя","ое","ее","ой","ые","ие","ый","йй",
+                "ам","ами","ас","aм","ax","ая","её","ей","ем","еми","емя","ex","ею","ёт","ёте","ёх","ёшь","ий","ие","им","ими","ит","ите","их","ишь","ию","м","ми",
+                "мя","ов","ого","ое","оё","ой","ом","ому","ою","ум","умя","ут","ух","ую","шь"};
+            for (int i = 0; i < ThreeAbout.Length; i++)
+            {
+                if (word.EndsWith(ThreeAbout[i]))
+                {
+                    word = word.Replace(ThreeAbout[i], "");
+                    break;
+                }
+            }
+                
+            return word;
         }
 
         public static string test(string word)
