@@ -68,19 +68,23 @@ namespace Diplom
                 
             }
             /////////////////////////////////////////////////////
-            reader.Close();
-            fs.Close();
-           /* string ew = "ние";
-            string we = "Окончание";
-            we.EndsWith(ew);
-            string text = "";
-            foreach (KeyValuePair<string, string> keyValue in WordAccentDictionary)
-            {
+            path = System.IO.Directory.GetCurrentDirectory() + @"\BD\LexGroup\GLAG\";
+            string B = "LEXGROUP.txt";
+            fs = new FileStream(path + B, FileMode.Open);
+            reader = new StreamReader(fs, System.Text.Encoding.Default);
+            string file2 = reader.ReadToEnd();
+            string[] lol = file2.Split(new char[] { '\n', '\r',}, StringSplitOptions.RemoveEmptyEntries);
+            /* string ew = "ние";
+             string we = "Окончание";
+             we.EndsWith(ew);
+             string text = "";
+             foreach (KeyValuePair<string, string> keyValue in WordAccentDictionary)
+             {
 
-                text += keyValue.Key + " -- " + keyValue.Value + " \n";
+                 text += keyValue.Key + " -- " + keyValue.Value + " \n";
 
-            }
-            Stix.Text += text + " \n";*/
+             }
+             Stix.Text += text + " \n";*/
         }
 
         private void button2_Click(object sender, EventArgs e)//Найти стихи >>
@@ -145,7 +149,7 @@ namespace Diplom
             var ReS = new Regex(@"\)");
             var ReD = new Regex(@"\?");
             var ReF = new Regex(";");
-            var ReG = new Regex(".");
+           // var ReG = new Regex(".");
             file = ReN.Replace(file, " ");
             file = ReR.Replace(file, " ");
             file = ReT.Replace(file, " ");
@@ -158,7 +162,7 @@ namespace Diplom
             file = ReS.Replace(file, " ");
             file = ReD.Replace(file, " ");
             file = ReF.Replace(file, " ");
-            file = ReG.Replace(file, "");
+            //file = ReG.Replace(file, "");
             return file;
         }
 
@@ -172,7 +176,7 @@ namespace Diplom
                 if (!WordDictionary.ContainsKey(Words[i]))
                 {
                     wordDic[i] = new word();
-                    wordDic[i].slogs = wordDic[i].FormateSlog(Words[i]);
+                    wordDic[i].slogs = wordDic[i].SlogSpliter(Words[i]);
                     try { wordDic[i].Accent = WordAccentDictionary[Words[i]]; } //Находит ударение по ключу....По слову
                     //Если такого ключа нет  проверяем на окончания. И опять ищем по ключу
                     catch

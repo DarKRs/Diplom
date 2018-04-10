@@ -12,7 +12,7 @@ namespace Diplom
         public string Accent;
 
         /////////////////////Формирование "слогов" (Разбиение по гласным)////////////////////////
-        public string[] FormateSlog(string word)
+        public string[] SlogSpliter(string word)
         {
             string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
             List<int> glasIndexes = new List<int>();
