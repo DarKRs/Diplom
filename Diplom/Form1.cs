@@ -73,7 +73,21 @@ namespace Diplom
             fs = new FileStream(path + B, FileMode.Open);
             reader = new StreamReader(fs, System.Text.Encoding.Default);
             string file2 = reader.ReadToEnd();
-            string[] lol = file2.Split(new char[] { '\n', '\r',}, StringSplitOptions.RemoveEmptyEntries);
+            string[] textOfFile2 = file2.Split(new char[] { '\n', '\r',}, StringSplitOptions.RemoveEmptyEntries);
+            LEXGROUP[] lexgroup = new LEXGROUP[textOfFile2.Length];
+            int q = 0;
+            for (int i = 0; i < textOfFile2.Length; i++)
+            {
+                if (textOfFile2[i].Contains('{'))
+                {
+                    lexgroup[q] = new LEXGROUP();
+                    lexgroup[q].ends = Skobki(textOfFile2[i]);
+                    q++;
+                    continue;
+                }
+                lexgroup[q-1].words += textOfFile2[i] + ",";
+            }
+            string[] sadas= Skobki("{тавшись,чься,чьтесь,че{мся,тся,шься,тесь},та{лся,лась,лись,лось,ться},чусь,чутся} таться сов.вид");
             /* string ew = "ние";
              string we = "Окончание";
              we.EndsWith(ew);
@@ -85,6 +99,52 @@ namespace Diplom
 
              }
              Stix.Text += text + " \n";*/
+        }
+
+        /// <summary>
+        /// Раскрытие скобок
+        /// </summary>
+        /// <param name="s">Строка со скобками</param>
+        /// <returns>Возвращает массив готовых окончаний (открытие скобок сделано)</returns>
+        private string[] Skobki(string s)
+        {
+            int o = 0; //Счётчик для вставки раскрытых слов в конечный массив
+            //Избавляемся от лишнего текста в конце. (+1 чтобы осталась скобка)
+            string text = s.Remove(s.LastIndexOf('}'));
+            text = text.Remove(text.IndexOf('{'),1);
+            // text = Skobki1.Replace(text, " ");
+            // text = Skobki2.Replace(text, " ");
+            string[] mass = text.Split(',');
+            string[] isxod = new string[mass.Length + 50]; //В получившийся массив нужно записать отсплитованные слова
+            for (int i=0; i < mass.Length; i++)
+            {
+                if (mass[i].Contains('{'))
+                {
+                    string[] skoba01 = mass[i].Split('{');
+                    string[] skobki = new string[mass.Length + 50];
+                    int j = 0;
+                    int k = 0;
+                    while (i < mass.Length)
+                    {
+                        i++;
+                        if (mass[i].Contains('}'))
+                        {
+                            mass[i] = mass[i].Remove(mass[i].IndexOf('}'));
+                            skobki[j] = mass[i];
+                            break;
+                        }
+                        skobki[j] = mass[i];
+                        j++;
+                    }
+                    isxod[o] = skoba01[0] + skoba01[1]; o++;
+                    for(int l = 0; skobki[l] != null; l++)
+                    {
+                        isxod[o] = skoba01[0] + skobki[l]; o++;
+                    }
+                }
+                isxod[o] = mass[i]; o++;
+            }
+            return isxod;
         }
 
         private void button2_Click(object sender, EventArgs e)//Найти стихи >>
@@ -149,7 +209,6 @@ namespace Diplom
             var ReS = new Regex(@"\)");
             var ReD = new Regex(@"\?");
             var ReF = new Regex(";");
-           // var ReG = new Regex(".");
             file = ReN.Replace(file, " ");
             file = ReR.Replace(file, " ");
             file = ReT.Replace(file, " ");
@@ -162,7 +221,6 @@ namespace Diplom
             file = ReS.Replace(file, " ");
             file = ReD.Replace(file, " ");
             file = ReF.Replace(file, " ");
-            //file = ReG.Replace(file, "");
             return file;
         }
 
