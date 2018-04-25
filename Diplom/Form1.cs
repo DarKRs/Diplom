@@ -15,8 +15,10 @@ namespace Diplom
 {
     public partial class SearchVerse : Form
     {
+        int qlex = 0; //Счётчик для LEXGROUP
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
+        public LEXGROUP[] lexgroup;
         Dictionary<string, word> WordDictionary = new Dictionary<string, word>();
         Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);//Словарь слов с ударениями(Формуриуется из БД при иницилизации)
         public SearchVerse()
@@ -68,37 +70,54 @@ namespace Diplom
                 
             }
             /////////////////////////////////////////////////////
+            reader.Close();
+            fs.Close();
+            /////////////////////////////////////////////////////Чтение всех файлов//////////////////
             path = System.IO.Directory.GetCurrentDirectory() + @"\BD\LexGroup\GLAG\";
-            string B = "LEXGROUP.txt";
-            fs = new FileStream(path + B, FileMode.Open);
-            reader = new StreamReader(fs, System.Text.Encoding.Default);
-            string file2 = reader.ReadToEnd();
-            string[] textOfFile2 = file2.Split(new char[] { '\n', '\r',}, StringSplitOptions.RemoveEmptyEntries);
-            LEXGROUP[] lexgroup = new LEXGROUP[textOfFile2.Length];
-            int q = 0;
-            for (int i = 0; i < textOfFile2.Length; i++)
+            int leng = new DirectoryInfo(path).GetFiles().Length; //Получает кол-во файлов в папке. 
+            lexgroup = new LEXGROUP[854]; //Создание объектов LEXGROUP для удобной работы с ними
+            ReadAllFiles(path, leng);
+            //////////////////////////////////////////////////////////
+            for (int i=0; i < lexgroup.Length; i++)
             {
-                if (textOfFile2[i].Contains('{'))
-                {
-                    lexgroup[q] = new LEXGROUP();
-                    lexgroup[q].ends = Skobki(textOfFile2[i]);
-                    q++;
-                    continue;
-                }
-                lexgroup[q-1].words += textOfFile2[i] + ",";
+                lexgroup[i].DeleteCom();
             }
-            string[] sadas= Skobki("{тавшись,чься,чьтесь,че{мся,тся,шься,тесь},та{лся,лась,лись,лось,ться},чусь,чутся} таться сов.вид");
-            /* string ew = "ние";
-             string we = "Окончание";
-             we.EndsWith(ew);
-             string text = "";
-             foreach (KeyValuePair<string, string> keyValue in WordAccentDictionary)
-             {
+            string lol = lexgroup[5].words;
+        }
 
-                 text += keyValue.Key + " -- " + keyValue.Value + " \n";
+        private void ReadAllFiles(string path, int leng)
+        {
+            FileStream fs;
+            StreamReader reader;
+            string Lex = "LEXGROUP.";
 
-             }
-             Stix.Text += text + " \n";*/
+            for (int l = 0; l < leng; l++)
+            {
+                string number = "";
+                ///////////////////////////Прописываем номер файла///////////////////
+                if (l == 0) { number = "000"; }
+                if (l < 10 && l > 0) { number = l.ToString().PadLeft(3, '0'); }
+                if (l < 100 && l > 9) { number = l.ToString().PadLeft(3, '0'); }
+                if (l > 99) { number = l.ToString(); }
+                //////////////////////////////////////////////////////////////////////
+                try { fs = new FileStream(path + Lex + number, FileMode.Open);
+                    reader = new StreamReader(fs, System.Text.Encoding.Default);
+                    string file2 = reader.ReadToEnd();
+                    string[] textOfFile = file2.Split(new char[] { '\n', '\r', }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < textOfFile.Length; i++)
+                    {
+                        if (textOfFile[i].Contains('{'))
+                        {
+                            lexgroup[qlex] = new LEXGROUP();
+                            lexgroup[qlex].ends = Skobki(textOfFile[i]);
+                            qlex++;
+                            continue;
+                        }
+                        lexgroup[qlex - 1].words += textOfFile[i] + ",";
+                    }
+                }
+                catch { continue; }
+            }
         }
 
         /// <summary>
