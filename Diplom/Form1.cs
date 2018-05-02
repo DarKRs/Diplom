@@ -18,7 +18,7 @@ namespace Diplom
         int qlex = 0; //Счётчик для LEXGROUP
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
-        public LEXGROUP[] lexgroup;
+        LEXGROUP[] lexgroup;
         Dictionary<string, word> WordDictionary = new Dictionary<string, word>();
         Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);//Словарь слов с ударениями(Формуриуется из БД при иницилизации)
         public SearchVerse()
@@ -81,8 +81,9 @@ namespace Diplom
             for (int i=0; i < lexgroup.Length; i++)
             {
                 lexgroup[i].DeleteCom();
+                if (lexgroup[i].words == null) { lexgroup[i].words = "test"; }
+                try { lexgroup[i].MassWords = lexgroup[i].words.Split(','); } catch { continue; }
             }
-            string lol = lexgroup[5].words;
         }
 
         private void ReadAllFiles(string path, int leng)
@@ -99,7 +100,7 @@ namespace Diplom
                 if (l < 10 && l > 0) { number = l.ToString().PadLeft(3, '0'); }
                 if (l < 100 && l > 9) { number = l.ToString().PadLeft(3, '0'); }
                 if (l > 99) { number = l.ToString(); }
-                //////////////////////////////////////////////////////////////////////
+                /////////////////////////////Читаем файл и раскрываем скобки/////////////////////////////////////////
                 try { fs = new FileStream(path + Lex + number, FileMode.Open);
                     reader = new StreamReader(fs, System.Text.Encoding.Default);
                     string file2 = reader.ReadToEnd();
@@ -108,6 +109,7 @@ namespace Diplom
                     {
                         if (textOfFile[i].Contains('{'))
                         {
+                            
                             lexgroup[qlex] = new LEXGROUP();
                             lexgroup[qlex].ends = Skobki(textOfFile[i]);
                             qlex++;
@@ -142,7 +144,6 @@ namespace Diplom
                     string[] skoba01 = mass[i].Split('{');
                     string[] skobki = new string[mass.Length + 50];
                     int j = 0;
-                    int k = 0;
                     while (i < mass.Length)
                     {
                         i++;
@@ -182,18 +183,15 @@ namespace Diplom
             Words = Words.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             ////////////////////////////
             DictionarySlogs();
-            foreach (KeyValuePair<string, word> keyValue in WordDictionary)
+            for(int i=0; i < Words.Length; i++)
             {
-                Stix.Text += keyValue.Key + " /// ";
-                for (int i = 0; i < keyValue.Value.slogs.Length; i++)
+                Stix.Text += Words[i] + " /// ";
+                for(int k=0; k < WordDictionary[Words[i]].slogs.Length; k++)
                 {
-                    Stix.Text += " " + keyValue.Value.slogs[i];
+                    Stix.Text += " " + WordDictionary[Words[i]].slogs[k];
                 }
-                Stix.Text += " " + keyValue.Value.Accent + "\n";
+                Stix.Text += "  /// " + WordDictionary[Words[i]].Accent + "\n";
             }
-            string sed = "";
-            word lol = new word();
-            WordDictionary.Add("123", lol);
         }
 
         private void OpenText_Click(object sender, EventArgs e)
@@ -228,6 +226,7 @@ namespace Diplom
             var ReS = new Regex(@"\)");
             var ReD = new Regex(@"\?");
             var ReF = new Regex(";");
+            var ReG = new Regex("—");
             file = ReN.Replace(file, " ");
             file = ReR.Replace(file, " ");
             file = ReT.Replace(file, " ");
@@ -240,6 +239,7 @@ namespace Diplom
             file = ReS.Replace(file, " ");
             file = ReD.Replace(file, " ");
             file = ReF.Replace(file, " ");
+            file = ReG.Replace(file, " ");
             return file;
         }
 
@@ -258,18 +258,24 @@ namespace Diplom
                     //Если такого ключа нет  проверяем на окончания. И опять ищем по ключу
                     catch
                     {
-                        string abWord = about(Words[i]);
+                        ////Работа с окончаниями
+                        string abWord = AddAbout(Words[i],WordAccentDictionary);
                         try { wordDic[i].Accent = WordAccentDictionary[abWord]; }
                         catch { WordAccentDictionary.Add(Words[i], Words[i]); wordDic[i].Accent = WordAccentDictionary[Words[i]]; } //Добавление ЭТОГО же слова как слова с ударением т.к. некоторые слова безударные
-                        WordDictionary.Add(Words[i], wordDic[i]);
                     }
+                    WordDictionary.Add(Words[i], wordDic[i]);
                 }
             }
         }
 
-        //Проверка на ококончание
-        public static string about(string word)
+        /// <summary>
+        /// Удаление окончания и добавление другого 
+        /// </summary>
+        /// <param name="word">Входяшее слово</param>
+        /// <returns></returns>
+        public string AddAbout(string word, Dictionary<string,string> AccentDictionary)
         {
+            string NewWord = "";
             //Массив окончаний
             string[] ThreeAbout = { "ать", "ять", "оть", "еть", "уть", "у", "ю", "ем", "ешь", "ете", "ет","ут","ют","ал","ял","ала","яла","али","яли","ул","ула","ули",
                 "а","я","о","е","ь","ы","и","ая","яя","ое","ее","ой","ые","ие","ый","йй",
@@ -280,12 +286,29 @@ namespace Diplom
                 if (word.EndsWith(ThreeAbout[i]))
                 {
                     word = word.Replace(ThreeAbout[i], "");
+                    if (!AccentDictionary.ContainsKey(word))
+                    {
+                        for (int j = 0; j < lexgroup.Length; j++)
+                        {
+                           for(int k=0;k < lexgroup[j].MassWords.Length; k++)
+                            {
+                                if(word == lexgroup[j].MassWords[k])
+                                {
+                                    for (int l = 0; l < lexgroup[j].ends.Length; l++)
+                                    {
+                                        NewWord = word + lexgroup[j].ends[l];
+                                        if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
+                                    }
+                                }
+                            }
+                      }
+                    }
                     break;
                 }
             }
-                
             return word;
         }
+
 
         public static string test(string word)
         {
