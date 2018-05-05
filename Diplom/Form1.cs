@@ -29,6 +29,7 @@ namespace Diplom
 
         void Initialization()
         {
+            var re = new Regex("'");
             string path = System.IO.Directory.GetCurrentDirectory() + @"\BD\";
             /////////////////////Загрузка словаря ударений////////////////////////
             string A = "Slovar_udareny.txt";
@@ -53,10 +54,10 @@ namespace Diplom
                 if (WordsAccent[i] == WordsAccent[i + 1] && !WordAccentDictionary.ContainsKey(WordsAccent[i]))
                 {
                     //////////Слово без ударения/////////////
-                    WordAccentDictionary.Add(WordsAccent[i], WordsAccent[i + 1]);
+                    WordAccentDictionary.Add(WordsAccent[i], "");
                     i++;
                 }
-                else if (WordsAccent[i + 1].Contains('\'') && !WordAccentDictionary.ContainsKey(WordsAccent[i]))
+                else if (WordsAccent[i + 1].Contains('\'') && WordsAccent[i] == re.Replace(WordsAccent[i + 1],"") && !WordAccentDictionary.ContainsKey(WordsAccent[i]))
                 {
                     WordAccentDictionary.Add(WordsAccent[i], WordsAccent[i + 1]);
                     i++;
@@ -192,6 +193,18 @@ namespace Diplom
                 }
                 Stix.Text += "  /// " + WordDictionary[Words[i]].Accent + "\n";
             }
+            Stix.Text += "\n \n";
+            ///////////////////Поиск четырехстопного ямба в тексте////////////////////
+            for (int i = 0; i < Words.Length - 3; i++)
+            {
+                string Yamb = Words[i] + " " + Words[i + 1] + " " + Words[i + 2] + " " + Words[i + 3];
+                string[] Stope = Yamb.Split(' ');
+                for (int qStope = 0; qStope < 4; qStope++) {
+                    int NumberofAccent = WordDictionary[Stope[qStope]].AccentInSlogs();
+                    string AccentSlog = WordDictionary[Stope[qStope]].Accent;
+                    
+                }
+            }
         }
 
         private void OpenText_Click(object sender, EventArgs e)
@@ -308,37 +321,5 @@ namespace Diplom
             }
             return word;
         }
-
-
-        public static string test(string word)
-        {
-            string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
-            List<int> glasIndexes = new List<int>();
-            for (int i = 0; i < word.Length; i++)
-            {
-                string symbol = word.Substring(i, 1);
-                for (int j = 0; j < glas.Length; j++)
-                {
-                    if (symbol == glas[j])
-                    {
-                        glasIndexes.Add(i);
-                        break;
-                    }
-                }
-            }
-            string result = string.Empty;
-            for (int i = glasIndexes.Count - 1; i > 0; i--)
-            {
-                if (glasIndexes[i] - glasIndexes[i - 1] == 1)
-                    continue;
-                int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
-                result = "-" + word.Substring(glasIndexes[i - 1] + 1 + n / 2) + result;
-                word = word.Remove(glasIndexes[i - 1] + 1 + n / 2);
-            }
-            result = word + result;
-            return result;
-        }
-
-
     }
 }
