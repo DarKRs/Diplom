@@ -201,10 +201,20 @@ namespace Diplom
             }
             Stix.Text += "\n \n";
             string BY = WordBY();
-
-                
-          
+            StixMetr(BY);
         }
+
+        private string StixMetr(string WordBY)
+        {
+            List<string> Stix = WordBY.Split(' ').ToList();
+            foreach (string s in Stix)
+            {
+                if(s.Length < 2) { Stix.Remove(s); }
+            }
+            return "Yamb";
+        }
+
+
         /// <summary>
         /// Построение строки по типу БУУБУБУБ (Б - Безударные, У - ударные)
         /// </summary>
