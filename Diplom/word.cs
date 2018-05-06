@@ -10,6 +10,7 @@ namespace Diplom
     {
         public string[] slogs;
         public string Accent;
+        public string[] Accentslogs;
 
 
         /////////////////////Формирование "слогов" (Разбиение по гласным)////////////////////////

@@ -191,20 +191,54 @@ namespace Diplom
                 {
                     Stix.Text += " " + WordDictionary[Words[i]].slogs[k];
                 }
-                Stix.Text += "  /// " + WordDictionary[Words[i]].Accent + "\n";
+                Stix.Text += "  /// " + WordDictionary[Words[i]].Accent;
+                Stix.Text += "  /// ";
+                for (int k = 0; k < WordDictionary[Words[i]].Accentslogs.Length; k++)
+                {
+                    Stix.Text += " " + WordDictionary[Words[i]].Accentslogs[k];
+                }
+                Stix.Text += "\n";
             }
             Stix.Text += "\n \n";
-            ///////////////////Поиск четырехстопного ямба в тексте////////////////////
-            for (int i = 0; i < Words.Length - 3; i++)
+            string BY = WordBY();
+
+                
+          
+        }
+        /// <summary>
+        /// Построение строки по типу БУУБУБУБ (Б - Безударные, У - ударные)
+        /// </summary>
+        /// <returns>Возвращает строку ударных безударных и вариативных</returns>
+        private string WordBY()
+        {
+            string WordsBY = "";
+            for (int i = 0; i < Words.Length; i++)
             {
-                string Yamb = Words[i] + " " + Words[i + 1] + " " + Words[i + 2] + " " + Words[i + 3];
-                string[] Stope = Yamb.Split(' ');
-                for (int qStope = 0; qStope < 4; qStope++) {
-                    int NumberofAccent = WordDictionary[Stope[qStope]].AccentInSlogs();
-                    string AccentSlog = WordDictionary[Stope[qStope]].Accent;
-                    
+                if (WordDictionary.ContainsKey(Words[i]))
+                {
+                    //Перебор по слогам. Так как в разных словах разное кол-во то используем цикл
+                    for (int j = 0; j < WordDictionary[Words[i]].slogs.Length; j++)
+                    {
+                        //Если для этого слова нет ударения. Делаем оба слова вариативными (В)
+                        if (WordDictionary[Words[i]].Accent == "")
+                        {
+                            for (int k = 0; k < WordDictionary[Words[i]].slogs.Length; k++) { WordsBY += "В"; }
+                            break;
+                        }
+                        if (WordDictionary[Words[i]].Accentslogs[j].Contains("'"))
+                        {
+                            WordsBY += "У";
+                        }
+
+                        if (!WordDictionary[Words[i]].Accentslogs[j].Contains("'"))
+                        {
+                            WordsBY += "Б";
+                        }
+                    }
                 }
+                WordsBY += " ";
             }
+            return WordsBY;
         }
 
         private void OpenText_Click(object sender, EventArgs e)
@@ -274,8 +308,9 @@ namespace Diplom
                         ////Работа с окончаниями
                         string abWord = AddAbout(Words[i],WordAccentDictionary);
                         try { wordDic[i].Accent = WordAccentDictionary[abWord]; }
-                        catch { WordAccentDictionary.Add(Words[i], Words[i]); wordDic[i].Accent = WordAccentDictionary[Words[i]]; } //Добавление ЭТОГО же слова как слова с ударением т.к. некоторые слова безударные
+                        catch { WordAccentDictionary.Add(Words[i], ""); wordDic[i].Accent = ""; } //Добавление ЭТОГО же слова как слова с ударением т.к. некоторые слова безударные
                     }
+                    wordDic[i].Accentslogs = wordDic[i].SlogSpliter(wordDic[i].Accent);
                     WordDictionary.Add(Words[i], wordDic[i]);
                 }
             }
