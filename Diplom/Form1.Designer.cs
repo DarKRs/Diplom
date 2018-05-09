@@ -72,6 +72,7 @@
             // 
             this.Stix.Location = new System.Drawing.Point(402, 31);
             this.Stix.Name = "Stix";
+            this.Stix.ReadOnly = true;
             this.Stix.Size = new System.Drawing.Size(300, 326);
             this.Stix.TabIndex = 3;
             this.Stix.Text = "";

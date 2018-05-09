@@ -263,7 +263,7 @@ namespace Diplom
             if (OpenSourseText.FileName != "") //если в окне была нажата кнопка "ОК"
             {
                 FileStream fs = new FileStream(path, FileMode.Open);
-                StreamReader reader = new StreamReader(fs, System.Text.Encoding.Default);
+                StreamReader reader = new StreamReader(fs, System.Text.Encoding.UTF8);
                 string file = reader.ReadToEnd();
                 //////////////////////////////
                 SourseText.Text = file;
@@ -344,7 +344,6 @@ namespace Diplom
                     }
                     wordDic[i].Accentslogs = wordDic[i].SlogSpliter(wordDic[i].Accent);
                     WordDictionary.Add(Words[i], wordDic[i]);
-                   
                 }
             }
         }
