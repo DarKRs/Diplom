@@ -207,11 +207,11 @@ namespace Diplom
 
         private string StixMetr(string WordBY)
         {
-            string[] Yamb = WordBY.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            for(int i=0; i < Yamb.Length - 3; i++)
+            string[] Metr = WordBY.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            for(int i=0; i < Metr.Length - 3; i++)
             {
-                string asd = Yamb[i] + Yamb[i + 1] + Yamb[i + 2] + Yamb[i + 3];
-                if (Yamb[i] + Yamb[i+1] + Yamb[i+2] + Yamb[i+3] == "УБУБУБУБ") { }
+                string Yamb = Metr[i] + " " + Metr[i + 1] + " " + Metr[i + 2] + " " + Metr[i + 3]; 
+                if (Yamb == "УБ УБ УБ УБ") { Stix.Text += Yamb; Stix.Text += "\n"; }
             }
             return "Yamb";
         }
@@ -272,7 +272,7 @@ namespace Diplom
 
               
 
-        ////////Обработка текста.Убирание новой строки и кареток \n & \r//////////////////
+        ////////Обработка текста.//////////////////
         private string ReplaceNR(string file)
         {
             var ReN = new Regex("\n");
@@ -288,6 +288,7 @@ namespace Diplom
             var ReD = new Regex(@"\?");
             var ReF = new Regex(";");
             var ReG = new Regex("—");
+            var ReH = new Regex(@"\.");
             file = ReN.Replace(file, " ");
             file = ReR.Replace(file, " ");
             file = ReT.Replace(file, " ");
@@ -301,6 +302,7 @@ namespace Diplom
             file = ReD.Replace(file, " ");
             file = ReF.Replace(file, " ");
             file = ReG.Replace(file, " ");
+            file = ReH.Replace(file, " ");
             return file;
         }
 
@@ -319,11 +321,20 @@ namespace Diplom
                     //Если такого ключа нет  проверяем на окончания. И опять ищем по ключу
                     catch
                     {
+                        string oldWord = Words[i];
                         ////Работа с окончаниями
                         string newAccent = DelOneEnd(Words[i],WordAccentDictionary); //Сначало удаляем 1 букву в конце. (самых == самый)
+                        if (WordAccentDictionary.ContainsKey(newAccent))
+                        {
+                            Verify(newAccent, oldWord);
+                        }
                         if (!WordAccentDictionary.ContainsKey(newAccent))
                         {
                             newAccent = AddAbout(Words[i], WordAccentDictionary); //Удаляем по окончанию
+                            if (WordAccentDictionary.ContainsKey(newAccent))
+                            {
+                                Verify(newAccent, oldWord);
+                            }
                             if (!WordAccentDictionary.ContainsKey(newAccent))
                             {
                                 for (int k = 1; k < Words[i].Length / 2 - 1; k++) //Удаляем несколько букв в конце (k)
@@ -331,6 +342,7 @@ namespace Diplom
                                     newAccent = DelEndAddAbout(Words[i], WordAccentDictionary, k);
                                     if (WordAccentDictionary.ContainsKey(newAccent))
                                     {
+                                        Verify(newAccent, oldWord);
                                         break;
                                     }
                                 }
@@ -433,6 +445,92 @@ namespace Diplom
             }
             if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
             return word;
+        }
+
+        public void Verify(string newAccent,string oldWord) {
+            char[] NewAccentWordChar;
+            //Получение номера слога где находится ударение
+            int NumberSlogAccent = AccentInSlogs(SlogSpliter(WordAccentDictionary[newAccent]));
+            if (NumberSlogAccent <= SlogSpliter(oldWord).Length)
+            {
+                if (WordAccentDictionary[newAccent].Length - 1 > oldWord.Length)
+                {
+                    string cheker = WordAccentDictionary[newAccent].Remove(oldWord.Length + 1);
+                    NewAccentWordChar = cheker.ToCharArray();
+                }
+                else { NewAccentWordChar = WordAccentDictionary[newAccent].ToCharArray(); }
+               
+                char[] OldWordChar = oldWord.ToCharArray();
+               
+                for (int l = NewAccentWordChar.Length - 1; l != 1; l--)
+                {
+                    if (NewAccentWordChar[l] == '\'')
+                    {
+                        break;
+                    }
+                    NewAccentWordChar[l] = OldWordChar[l - 1];
+                }
+                string NewAccentWord = new string(NewAccentWordChar);
+                AddAccentToDictionary(oldWord, NewAccentWord);
+            }
+        }
+
+        private void AddAccentToDictionary(string word, string Accent)
+        {
+            string path = System.IO.Directory.GetCurrentDirectory() + @"\BD\" + "Slovar_udareny.txt";
+            string text = "!" + word + " " + Accent;
+            using (FileStream fstream = new FileStream(path, FileMode.OpenOrCreate))
+            {
+                // преобразуем строку в байты
+                byte[] array = System.Text.Encoding.Default.GetBytes(text);
+                // запись массива байтов в файл
+                fstream.Seek(0, SeekOrigin.End);
+                fstream.Write(array, 0, array.Length);
+                fstream.Close();
+            }
+            
+        }
+
+        public string[] SlogSpliter(string word)
+        {
+            string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
+            List<int> glasIndexes = new List<int>();
+            for (int i = 0; i < word.Length; i++)
+            {
+                string symbol = word.Substring(i, 1);
+                for (int j = 0; j < glas.Length; j++)
+                {
+                    if (symbol == glas[j])
+                    {
+                        glasIndexes.Add(i);
+                        break;
+                    }
+                }
+            }
+            string result = string.Empty;
+            for (int i = glasIndexes.Count - 1; i > 0; i--)
+            {
+                if (glasIndexes[i] - glasIndexes[i - 1] == 1)
+                    continue;
+                int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
+                result = "-" + word.Substring(glasIndexes[i - 1] + 1 + n / 2) + result;
+                word = word.Remove(glasIndexes[i - 1] + 1 + n / 2);
+            }
+            result = word + result;
+            string[] slogs = result.Split('-');
+            return slogs;
+        }
+
+        public int AccentInSlogs(string[] wordslog)
+        {
+            for(int i=0; i<wordslog.Length;i++)
+            {
+                if (wordslog[i].Contains("'"))
+                {
+                    return i;
+                }
+            }
+            return 256;
         }
     }
 }
