@@ -258,15 +258,23 @@ namespace Diplom
         private void OpenText_Click(object sender, EventArgs e)
         {
             OpenSourseText.Filter = "Text(*.txt)|*.txt";
-            OpenSourseText.ShowDialog();
-            string path = OpenSourseText.FileName;
-            if (OpenSourseText.FileName != "") //если в окне была нажата кнопка "ОК"
+            try
             {
-                FileStream fs = new FileStream(path, FileMode.Open);
-                StreamReader reader = new StreamReader(fs, System.Text.Encoding.UTF8);
-                string file = reader.ReadToEnd();
-                //////////////////////////////
-                SourseText.Text = file;
+                OpenSourseText.ShowDialog();
+                string path = OpenSourseText.FileName;
+                if (OpenSourseText.FileName != "") //если в окне была нажата кнопка "ОК"
+                {
+                    FileStream fs = new FileStream(path, FileMode.Open);
+                    StreamReader reader = new StreamReader(fs, System.Text.Encoding.UTF8);
+                    string file = reader.ReadToEnd();
+                    //////////////////////////////
+                    SourseText.Text = file;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message,
+                "Не удалось открыть файл", MessageBoxButtons.OK, MessageBoxIcon.Information); return;
             }
         }
 
@@ -360,6 +368,12 @@ namespace Diplom
             }
         }
 
+        /// <summary>
+        /// Удаление одной буквы из окончания и замена его на другую букву
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="AccentDictionary"></param>
+        /// <returns></returns>
         private string DelOneEnd(string word, Dictionary<string, string> AccentDictionary)//Удаление одной буквы в слове и замена на другую
         {
             string NewWord = "";
@@ -447,32 +461,24 @@ namespace Diplom
             return word;
         }
 
-        public void Verify(string newAccent,string oldWord) {
-            char[] NewAccentWordChar;
+        /// <summary>
+        /// Проверка и изменение слова для добавления его в словарь
+        /// </summary>
+        /// <param name="newAccent"></param>
+        /// <param name="oldWord"></param>
+        public void Verify(string newAccent, string oldWord)
+        {
             //Получение номера слога где находится ударение
             int NumberSlogAccent = AccentInSlogs(SlogSpliter(WordAccentDictionary[newAccent]));
-            if (NumberSlogAccent <= SlogSpliter(oldWord).Length)
+            if (NumberSlogAccent <= SlogSpliter(oldWord).Length) //Если ударение не выходит за рамки
             {
-                if (WordAccentDictionary[newAccent].Length - 1 > oldWord.Length)
-                {
-                    string cheker = WordAccentDictionary[newAccent].Remove(oldWord.Length + 1);
-                    NewAccentWordChar = cheker.ToCharArray();
-                }
-                else { NewAccentWordChar = WordAccentDictionary[newAccent].ToCharArray(); }
-               
-                char[] OldWordChar = oldWord.ToCharArray();
-               
-                for (int l = NewAccentWordChar.Length - 1; l != 1; l--)
-                {
-                    if (NewAccentWordChar[l] == '\'')
-                    {
-                        break;
-                    }
-                    NewAccentWordChar[l] = OldWordChar[l - 1];
-                }
-                string NewAccentWord = new string(NewAccentWordChar);
-                AddAccentToDictionary(oldWord, NewAccentWord);
+                string[] NewAccentWord = WordAccentDictionary[newAccent].Split('\'');
+                string PartOldWord = oldWord.Remove(0,NewAccentWord[0].Length);
+                NewAccentWord[0] += "'";
+                NewAccentWord[0] += PartOldWord;
+                AddAccentToDictionary(oldWord, NewAccentWord[0]);
             }
+               
         }
 
         private void AddAccentToDictionary(string word, string Accent)
