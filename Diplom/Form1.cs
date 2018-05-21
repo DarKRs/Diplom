@@ -74,15 +74,10 @@ namespace Diplom
             /////////////////////////////Чтение всех файлов для морфологического словаря//////////////////
             path = System.IO.Directory.GetCurrentDirectory() + @"\BD\LexGroup\GLAG\";
             int leng = new DirectoryInfo(path).GetFiles().Length; //Получает кол-во файлов в папке. 
-            lexgroup = new LEXGROUP[854]; //Создание объектов LEXGROUP для удобной работы с ними
+            lexgroup = new LEXGROUP[new DirectoryInfo(path).GetFiles().Length * 5]; //Создание объектов LEXGROUP для удобной работы с ними
             ReadAllFiles(path, leng);
             //////////////////////////////////////////////////////////
-            for (int i=0; i < lexgroup.Length; i++)
-            {
-                lexgroup[i].DeleteCom();
-                if (lexgroup[i].words == null) { lexgroup[i].words = "test"; }
-                try { lexgroup[i].MassWords = lexgroup[i].words.Split(','); } catch { continue; }
-            }
+         
         }
 
         /// <summary>
@@ -90,13 +85,13 @@ namespace Diplom
         /// </summary>
         /// <param name="path">Путь до папки с файлами LEXGROUP</param>
         /// <param name="leng">Кол-во файлов в папке</param>
-        private void ReadAllFiles(string path, int leng)
+        public void ReadAllFiles(string path, int leng)
         {
             FileStream fs;
             StreamReader reader;
             string Lex = "LEXGROUP.";
 
-            for (int l = 0; l < leng; l++)
+            for (int l = 0; l < leng+300; l++)
             {
                 string number = "";
                 ///////////////////////////Прописываем номер файла///////////////////
@@ -122,6 +117,13 @@ namespace Diplom
                     }
                 }
                 catch { continue; } //Если по какой-то причине не удалось открыть файл продолжаем чтение других
+            }
+            for (int i = 0; i < lexgroup.Length; i++)
+            {
+                lexgroup[i].DeleteCom();
+                lexgroup[i].CompareEnds();
+                if (lexgroup[i].words == null) { lexgroup[i].words = "test"; }
+                try { lexgroup[i].MassWords = lexgroup[i].words.Split(','); } catch { continue; }
             }
         }
 
@@ -179,20 +181,23 @@ namespace Diplom
             }
             string Sourse;
             Sourse = SourseText.Text;
+            string[] phrase = Sourse.Split('\n');
+            phrase = phrase.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             Sourse = ReplaceNR(Sourse);
+           
             Words = Sourse.Split(' ');
             Words = Words.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             ////////////////////////////
             CreateDictionary(); // Формирование словаря объектов класса word.
             for (int i=0; i < Words.Length; i++)
             {
-                Stix.Text += Words[i] + " /// ";
+                Stix.Text += Words[i] + "\t /// ";
                 for(int k=0; k < WordDictionary[Words[i]].slogs.Length; k++)
                 {
                     Stix.Text += " " + WordDictionary[Words[i]].slogs[k];
                 }
-                Stix.Text += "  /// " + WordDictionary[Words[i]].Accent;
-                Stix.Text += "  /// ";
+                Stix.Text += "\t  /// " + WordDictionary[Words[i]].Accent;
+                Stix.Text += "\t  /// ";
                 for (int k = 0; k < WordDictionary[Words[i]].Accentslogs.Length; k++)
                 {
                     Stix.Text += " " + WordDictionary[Words[i]].Accentslogs[k];
@@ -201,19 +206,25 @@ namespace Diplom
             }
             Stix.Text += "\n \n";
 
-            string BY = WordBY();
-            StixMetr(BY);
+            Stix.Text += "Найденная структура: \n";
+            for (int i = 0; i < phrase.Length; i++) {
+                Stix.Text += GenerateWordBY(phrase[i]) + "\t\t" + phrase[i];
+                Stix.Text += "\n";
+            }
+            //StixMetr(BY);
         }
 
         private string StixMetr(string WordBY)
         {
-            string[] Metr = WordBY.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            for(int i=0; i < Metr.Length - 3; i++)
-            {
-                string Yamb = Metr[i] + " " + Metr[i + 1] + " " + Metr[i + 2] + " " + Metr[i + 3]; 
-                if (Yamb == "УБ УБ УБ УБ") { Stix.Text += Yamb; Stix.Text += "\n"; }
-            }
-            return "Yamb";
+            if (WordBY.Contains("БУБУБУБУ")) { return "Четырехстопный Ямб"; }
+            return "";
+            /* string[] Metr = WordBY.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+             for(int i=0; i < Metr.Length - 3; i++)
+             {
+                 string Yamb = Metr[i] + " " + Metr[i + 1] + " " + Metr[i + 2] + " " + Metr[i + 3]; 
+                 if (Yamb == "БУБУБУБУ") { return "Четырехстопный Ямб"; }
+             }
+             return "";*/
         }
 
 
@@ -221,37 +232,40 @@ namespace Diplom
         /// Построение строки по типу БУУБУБУБ (Б - Безударные, У - ударные)
         /// </summary>
         /// <returns>Возвращает строку ударных безударных и вариативных</returns>
-        private string WordBY()
+        private string GenerateWordBY(string phrase)
         {
+            phrase = ReplaceNR(phrase);
+            string[] WordsInPrhase = phrase.Split(' ');
+            WordsInPrhase = WordsInPrhase.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             string WordsBY = "";
-            for (int i = 0; i < Words.Length; i++)
+            for (int i = 0; i < WordsInPrhase.Length; i++)
             {
                     //Перебор по слогам. Так как в разных словах разное кол-во то используем цикл
-                    for (int j = 0; j < WordDictionary[Words[i]].slogs.Length; j++)
+                    for (int j = 0; j < WordDictionary[WordsInPrhase[i]].slogs.Length; j++)
                     {
                         //Если для этого слова нет ударения. Делаем оба слова вариативными (В)
-                        if (WordDictionary[Words[i]].Accent == "")
+                        if (WordDictionary[WordsInPrhase[i]].Accent == "")
                         {
-                            for (int k = 0; k < WordDictionary[Words[i]].slogs.Length; k++) { WordsBY += "В"; }
+                            for (int k = 0; k < WordDictionary[WordsInPrhase[i]].slogs.Length; k++) { WordsBY += "В"; }
                             break;
                         }
                     try
                     {
-                        if (WordDictionary[Words[i]].Accentslogs[j].Contains("'"))
+                        if (WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
                         {
                             WordsBY += "У";
                         }
 
-                        if (!WordDictionary[Words[i]].Accentslogs[j].Contains("'"))
+                        if (!WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
                         {
                             WordsBY += "Б";
                         }
                     }
                     catch { break; }
                     }
-                
-                WordsBY += " ";
             }
+            string Metr = StixMetr(WordsBY);
+            if(Metr != "") { return WordsBY + "(" + Metr + ")"; }
             return WordsBY;
         }
 
@@ -481,7 +495,7 @@ namespace Diplom
                
         }
 
-        private void AddAccentToDictionary(string word, string Accent)
+        public void AddAccentToDictionary(string word, string Accent)
         {
             string path = System.IO.Directory.GetCurrentDirectory() + @"\BD\" + "Slovar_udareny.txt";
             string text = "!" + word + " " + Accent;
@@ -537,6 +551,60 @@ namespace Diplom
                 }
             }
             return 256;
+        }
+
+        //Помощь
+        private void какПользоватьсяПрограммойToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            KakPolzovatsyaProgrammoi Helped = new KakPolzovatsyaProgrammoi();
+            Helped.Owner = this;
+            Helped.Show();
+        }
+
+        //Об Авторе
+        private void AboutAutorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Author author = new Author();
+            author.Owner = this;
+            author.Show();
+        }
+
+        //Окончания
+        private void просмотрToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EndDictionary ends = new EndDictionary();
+            ends.Owner = this;
+            ends.Show();
+        }
+
+        private void просмотрToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            accentForm accentForm = new accentForm(WordAccentDictionary);
+            accentForm.Owner = this;
+            accentForm.Show();
+        }
+        
+        private void добавитьФайлLEXGROUPToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Использование делегата для возможности использования функции из дочерней формы AddAccent
+            AddaccentForm AddaccentForm = new AddaccentForm(WordAccentDictionary, new MyDelegate(AddAccentToDictionary));
+            AddaccentForm.Owner = this;
+            AddaccentForm.Show();
+        }
+
+        private void просмотрToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            MorphDictionary Morph = new MorphDictionary(lexgroup);
+            Morph.Owner = this;
+            Morph.Show();
+        }
+
+        private void добавитьУдарениеToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            qlex = 0;
+            AddFileToLexGroup AddtoMorph = new AddFileToLexGroup(lexgroup, new Delegate2(ReadAllFiles));
+            AddtoMorph.Owner = this;
+            AddtoMorph.Show();
         }
     }
 }
