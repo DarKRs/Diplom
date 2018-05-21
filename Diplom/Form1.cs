@@ -74,7 +74,7 @@ namespace Diplom
             /////////////////////////////Чтение всех файлов для морфологического словаря//////////////////
             path = System.IO.Directory.GetCurrentDirectory() + @"\BD\LexGroup\GLAG\";
             int leng = new DirectoryInfo(path).GetFiles().Length; //Получает кол-во файлов в папке. 
-            lexgroup = new LEXGROUP[new DirectoryInfo(path).GetFiles().Length * 5]; //Создание объектов LEXGROUP для удобной работы с ними
+            lexgroup = new LEXGROUP[new DirectoryInfo(path).GetFiles().Length + 300]; //Создание объектов LEXGROUP для удобной работы с ними
             ReadAllFiles(path, leng);
             //////////////////////////////////////////////////////////
          
@@ -120,10 +120,14 @@ namespace Diplom
             }
             for (int i = 0; i < lexgroup.Length; i++)
             {
-                lexgroup[i].DeleteCom();
-                lexgroup[i].CompareEnds();
-                if (lexgroup[i].words == null) { lexgroup[i].words = "test"; }
-                try { lexgroup[i].MassWords = lexgroup[i].words.Split(','); } catch { continue; }
+                try
+                {
+                    lexgroup[i].DeleteCom();
+                    lexgroup[i].CompareEnds();
+                    if (lexgroup[i].words == null) { lexgroup[i].words = "test"; }
+                    try { lexgroup[i].MassWords = lexgroup[i].words.Split(','); } catch { continue; }
+                }
+                catch { continue; }
             }
         }
 
