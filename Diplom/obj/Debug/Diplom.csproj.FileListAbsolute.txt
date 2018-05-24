@@ -33,3 +33,10 @@ C:\Git\Diplom\Diplom\obj\Debug\Diplom.EndDictionary.resources
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.AddaccentForm.resources
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.MorphDictionary.resources
 C:\Git\Diplom\Diplom\obj\Debug\Diplom.AddFileToLexGroup.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.accentForm.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.AddaccentForm.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.AddFileToLexGroup.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.Author.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.EndDictionary.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.KakPolzovatsyaProgrammoi.resources
+D:\Diplom\Diplom\obj\Debug\Diplom.MorphDictionary.resources

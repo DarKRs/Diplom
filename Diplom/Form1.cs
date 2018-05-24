@@ -14,7 +14,7 @@ namespace Diplom
         string[] Words; //Главный массив исходных слов (уже разбитых)
         string[] WordsAccent; //Главный массив слов ударений (Формуриуется из БД при иницилизации)
         LEXGROUP[] lexgroup; //Массив LEXGROUP хранящий в себе начало слов и их возможные окончания
-        Dictionary<string, word> WordDictionary = new Dictionary<string, word>(); //Словарь объектов класса word. В котором хранятся ударения, слоги и т.д.
+        Dictionary<string, word> WordDictionary = new Dictionary<string, word>(StringComparer.OrdinalIgnoreCase); //Словарь объектов класса word. В котором хранятся ударения, слоги и т.д.
         Dictionary<string, string> WordAccentDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);//Словарь ударений(Формуриуется из БД при иницилизации)
 
 
@@ -63,8 +63,9 @@ namespace Diplom
                 else
                 {
                     ////////////////////////////Словочетание///////////////////////
-                    WordAccentDictionary.Add(WordsAccent[i]+" " +  WordsAccent[i + 1], WordsAccent[i + 2] + " " + WordsAccent[i + 3]);
-                    i += 2;
+                    //WordAccentDictionary.Add(WordsAccent[i]+" " +  WordsAccent[i + 1], WordsAccent[i + 2] + " " + WordsAccent[i + 3]);
+                    //i += 2;
+                    continue;
                 }
                 
             }
@@ -129,6 +130,7 @@ namespace Diplom
                 }
                 catch { continue; }
             }
+            lexgroup = lexgroup.Where(x => x != null).ToArray();
         }
 
         /// <summary>
@@ -220,17 +222,152 @@ namespace Diplom
 
         private string StixMetr(string WordBY)
         {
-            if (WordBY.Contains("БУБУБУБУ")) { return "Четырехстопный Ямб"; }
-            return "";
-            /* string[] Metr = WordBY.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-             for(int i=0; i < Metr.Length - 3; i++)
-             {
-                 string Yamb = Metr[i] + " " + Metr[i + 1] + " " + Metr[i + 2] + " " + Metr[i + 3]; 
-                 if (Yamb == "БУБУБУБУ") { return "Четырехстопный Ямб"; }
-             }
-             return "";*/
+            char[] Stix = WordBY.ToCharArray();
+            char[] NWStix;
+            string ret = MetrYamb(Stix);
+            if(MetrYamb(Stix) == null)
+            {
+                //Проверка на хорей
+                if(MetrXorey(Stix) != null)
+                {
+                    ret = MetrXorey(Stix);
+                    return ret;
+                }
+            }
+            return ret;
         }
 
+        /// <summary>
+        /// Проверка на ямб
+        /// </summary>
+        /// <param name="Stix"></param>
+        /// <returns></returns>
+        private string MetrYamb(char[] Stix)
+        {
+            char[] NWStix = new char[Stix.Length];
+            ///////////////Нахождение ямба////////////
+            for (int i = 0; i < Stix.Length - 1; i++) //Yamb
+            {
+                if (Stix[i] == 'Б' && Stix[i + 1] == 'У') //Обычная конструкция по типу БУ
+                {
+                  
+                    NWStix[i] = Stix[i]; NWStix[i + 1] = Stix[i + 1];
+                    i++;
+                }
+                else if (Stix[i] == 'В' && Stix[i + 1] == 'У')
+                {
+          
+                    NWStix[i] = 'Б'; NWStix[i + 1] = Stix[i + 1];
+                    i++;
+                }
+                else if (Stix[i] == 'Б' && (Stix[i + 1] == 'В' || (Stix[i + 1] == 'Б' && Stix[i + 2] != 'У')))
+                { //Вариативность конструкции такая как БВ и БББ и ББВ
+     
+                    NWStix[i] = Stix[i]; NWStix[i + 1] = 'У';
+                    i++;
+                }
+                else if (Stix[i] == 'В' && Stix[i + 1] == 'В')//Если попалось ВВ то смотрим предидущие или будущие совпадения
+                {
+                    int sovp = 0;
+                    for (int j = 0; j < Stix.Length; j++)//Проход по всей стукрутре в поисках совпадений
+                    {
+                        if (Stix[j] == 'Б' && Stix[j + 1] == 'У') //Обычная конструкция по типу БУ
+                        {
+                            sovp++;
+                        }
+                        else if (Stix[j] == 'Б' && Stix[j + 1] == 'В')
+                        {
+                            sovp++;
+                        }
+                    }
+                    if (sovp >= 2) { NWStix[i] = 'У'; NWStix[i + 1] = 'Б'; i++; }
+                }
+                else { i++; }//Структуры ямба не было найдено
+            }
+            string Yamb = new string(NWStix);
+            Yamb = Yamb.Remove(Yamb.IndexOf('\0')); //Удаление лишних символов
+            if (Yamb.Contains("БУБУБУБУ"))
+            {
+                return  " " + Yamb + " Четырехстопный ямб";
+            }
+            else if (Yamb.Contains("БУБУБУ"))
+            {
+                return " " + Yamb + " Трехстопный ямб";
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Проверка на хорей
+        /// </summary>
+        /// <param name="Stix"></param>
+        /// <returns></returns>
+        private string MetrXorey(char[] Stix)
+        {
+            char[] NWStix = new char[Stix.Length];
+            ///////////////Нахождение ямба////////////
+            for (int i = 0; i < Stix.Length - 1; i++) //Yamb
+            {
+                if (Stix[i] == 'У' && Stix[i + 1] == 'Б') //Обычная конструкция по типу УБ
+                {
+
+                    NWStix[i] = Stix[i]; NWStix[i + 1] = Stix[i + 1];
+                    i++;
+                }
+                else if (Stix[i] == 'У' && Stix[i + 1] == 'В')
+                {
+
+                    NWStix[i] = 'У'; NWStix[i + 1] = 'Б';
+                    i++;
+                }
+                else if (Stix[i] == 'У' && (Stix[i + 1] == 'В' || (Stix[i + 1] == 'У' && Stix[i + 2] != 'Б')))
+                { //Вариативность конструкции такая как УВ и УУУ и УУВ
+
+                    NWStix[i] = Stix[i]; NWStix[i + 1] = 'Б';
+                    i++;
+                }
+                else if (Stix[i] == 'В' && Stix[i + 1] == 'В')//Если попалось ВВ то смотрим предидущие или будущие совпадения
+                {
+                    if (i == 0)
+                    {
+                        NWStix[i] = 'У'; NWStix[i + 1] = 'Б';
+                        i++; continue;
+                    }
+                    int sovp = 0;
+                    for(int j = 0; j < Stix.Length; j++)//Проход по всей стукрутре в поисках совпадений
+                    {
+                        if (Stix[j] == 'У' && Stix[j + 1] == 'Б') //Обычная конструкция по типу УБ
+                        {
+                            sovp++;
+                        }
+                        else if (Stix[j] == 'У' && Stix[j + 1] == 'В')
+                        {
+                            sovp++;
+                        }
+                    }
+                    if (sovp >= 1) { NWStix[i] = 'У'; NWStix[i + 1] = 'Б'; i++; }
+                }
+                else { i++; }//Структуры хорея не было найдено
+            }
+            string Xorey = new string(NWStix);
+            if (Xorey.Contains('\0')) { Xorey = Xorey.Remove(Xorey.IndexOf('\0')); } //Удаление лишних символов
+
+            if (Xorey.Contains("УБУБУБУБ"))
+            {
+                return " " + Xorey + " Четырехстопный хорей";
+            }
+            else if (Xorey.Contains("УБУБУБ"))
+            {
+                return " " + Xorey + " Трехстопный хорей";
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Построение строки по типу БУУБУБУБ (Б - Безударные, У - ударные)
@@ -287,6 +424,8 @@ namespace Diplom
                     string file = reader.ReadToEnd();
                     //////////////////////////////
                     SourseText.Text = file;
+                    reader.Close();
+                    fs.Close();
                 }
             }
             catch (Exception ex)
@@ -419,18 +558,22 @@ namespace Diplom
             {
                 for (int j = 0; j < lexgroup.Length; j++)
                 {
-                    for (int k = 0; k < lexgroup[j].MassWords.Length; k++)
+                    try
                     {
-                        if (NewWord == lexgroup[j].MassWords[k])
+                        for (int k = 0; k < lexgroup[j].MassWords.Length; k++)
                         {
-                            string s = NewWord;
-                            for (int l = 0; l < lexgroup[j].ends.Length; l++)
+                            if (NewWord == lexgroup[j].MassWords[k])
                             {
-                                NewWord = s + lexgroup[j].ends[l];
-                                if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
+                                string s = NewWord;
+                                for (int l = 0; l < lexgroup[j].ends.Length; l++)
+                                {
+                                    NewWord = s + lexgroup[j].ends[l];
+                                    if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
+                                }
                             }
                         }
                     }
+                    catch { continue; }
                 }
             }
             if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
@@ -459,18 +602,20 @@ namespace Diplom
                     {
                         for (int j = 0; j < lexgroup.Length; j++)
                         {
-                           for(int k=0;k < lexgroup[j].MassWords.Length; k++)
-                            {
-                                if(NewWord == lexgroup[j].MassWords[k])
+                            try { for (int k = 0; k < lexgroup[j].MassWords.Length; k++)
                                 {
-                                    for (int l = 0; l < lexgroup[j].ends.Length; l++)
+                                    if (NewWord == lexgroup[j].MassWords[k])
                                     {
-                                        NewWord = NewWord + lexgroup[j].ends[l];
-                                        if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
+                                        for (int l = 0; l < lexgroup[j].ends.Length; l++)
+                                        {
+                                            NewWord = NewWord + lexgroup[j].ends[l];
+                                            if (AccentDictionary.ContainsKey(NewWord)) { return NewWord; }
+                                        }
                                     }
                                 }
                             }
-                      }
+                            catch { continue; }
+                            }
                     }
                     break;
                 }
@@ -491,10 +636,13 @@ namespace Diplom
             if (NumberSlogAccent <= SlogSpliter(oldWord).Length) //Если ударение не выходит за рамки
             {
                 string[] NewAccentWord = WordAccentDictionary[newAccent].Split('\'');
-                string PartOldWord = oldWord.Remove(0,NewAccentWord[0].Length);
+                string PartOldWord = oldWord.Remove(0, NewAccentWord[0].Length);
                 NewAccentWord[0] += "'";
                 NewAccentWord[0] += PartOldWord;
-                AddAccentToDictionary(oldWord, NewAccentWord[0]);
+                if (!WordAccentDictionary.ContainsKey(oldWord))
+                {
+                    AddAccentToDictionary(oldWord, NewAccentWord[0]);
+                }
             }
                
         }
@@ -517,7 +665,9 @@ namespace Diplom
 
         public string[] SlogSpliter(string word)
         {
-            string[] glas = { "а", "у", "е", "ы", "о", "я", "и", "э", "ю" };
+            string[] glas = { "а", "у", "е", "ё", "ы", "о", "я", "и", "э", "ю" };
+            word = word.ToLower();
+
             List<int> glasIndexes = new List<int>();
             for (int i = 0; i < word.Length; i++)
             {
@@ -534,11 +684,26 @@ namespace Diplom
             string result = string.Empty;
             for (int i = glasIndexes.Count - 1; i > 0; i--)
             {
-                if (glasIndexes[i] - glasIndexes[i - 1] == 1)
-                    continue;
-                int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
-                result = "-" + word.Substring(glasIndexes[i - 1] + 1 + n / 2) + result;
-                word = word.Remove(glasIndexes[i - 1] + 1 + n / 2);
+                //if (glasIndexes[i] - glasIndexes[i - 1] == 1)
+                //    continue;
+                string symbol = word.Substring(glasIndexes[i] - 1, 1);
+                if (symbol == "ь" || symbol == "ъ")
+                {
+                    int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
+                    result = "-" + word.Substring(glasIndexes[i]) + result;
+                    word = word.Remove(glasIndexes[i]);
+                }
+                else
+                {
+                    int n = glasIndexes[i] - glasIndexes[i - 1] - 1;
+                    int ind = glasIndexes[i - 1] + 1 + n / 2;
+                    symbol = word.Substring(ind, 1);
+                    if (symbol == "ь" || symbol == "ъ") ind++;
+
+                    result = "-" + word.Substring(ind) + result;
+                    word = word.Remove(ind);
+                }
+
             }
             result = word + result;
             string[] slogs = result.Split('-');
@@ -603,6 +768,7 @@ namespace Diplom
             Morph.Show();
         }
 
+        //Добавить файл к морфологическому словарю
         private void добавитьУдарениеToolStripMenuItem_Click(object sender, EventArgs e)
         {
             qlex = 0;
