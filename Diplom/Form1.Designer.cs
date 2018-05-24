@@ -46,6 +46,7 @@
             this.какПользоватьсяПрограммойToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AboutAutorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenSourseText = new System.Windows.Forms.OpenFileDialog();
+            this.otladka = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,7 +84,7 @@
             this.Stix.Location = new System.Drawing.Point(402, 31);
             this.Stix.Name = "Stix";
             this.Stix.ReadOnly = true;
-            this.Stix.Size = new System.Drawing.Size(469, 370);
+            this.Stix.Size = new System.Drawing.Size(587, 370);
             this.Stix.TabIndex = 3;
             this.Stix.Text = "";
             // 
@@ -94,7 +95,7 @@
             this.HELPToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(883, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1001, 24);
             this.menuStrip1.TabIndex = 4;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -196,11 +197,24 @@
             // 
             this.OpenSourseText.FileName = "openFileDialog1";
             // 
+            // otladka
+            // 
+            this.otladka.AutoSize = true;
+            this.otladka.Checked = true;
+            this.otladka.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.otladka.Location = new System.Drawing.Point(295, 349);
+            this.otladka.Name = "otladka";
+            this.otladka.Size = new System.Drawing.Size(106, 30);
+            this.otladka.TabIndex = 5;
+            this.otladka.Text = "Вывод слогов и\r\nударений";
+            this.otladka.UseVisualStyleBackColor = true;
+            // 
             // SearchVerse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(883, 413);
+            this.ClientSize = new System.Drawing.Size(1001, 413);
+            this.Controls.Add(this.otladka);
             this.Controls.Add(this.Stix);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.OpenText);
@@ -236,6 +250,7 @@
         private System.Windows.Forms.ToolStripMenuItem добавитьУдарениеToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem словарьОкончанийРусскогоЯзыкаToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem просмотрToolStripMenuItem;
+        private System.Windows.Forms.CheckBox otladka;
     }
 }
 

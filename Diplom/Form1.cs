@@ -195,10 +195,23 @@ namespace Diplom
             Words = Words.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             ////////////////////////////
             CreateDictionary(); // Формирование словаря объектов класса word.
-            for (int i=0; i < Words.Length; i++)
+            
+
+            Stix.Text += "Найденная структура: \n";
+            for (int i = 0; i < phrase.Length; i++) {
+                Stix.Text += GenerateWordBY(phrase[i]) + "\t\t" + phrase[i];
+                Stix.Text += "\n";
+            }
+
+            if(otladka.Checked == true) { debug(); }
+        }
+
+        private void debug()
+        {
+            for (int i = 0; i < Words.Length; i++)
             {
                 Stix.Text += Words[i] + "\t /// ";
-                for(int k=0; k < WordDictionary[Words[i]].slogs.Length; k++)
+                for (int k = 0; k < WordDictionary[Words[i]].slogs.Length; k++)
                 {
                     Stix.Text += " " + WordDictionary[Words[i]].slogs[k];
                 }
@@ -211,30 +224,24 @@ namespace Diplom
                 Stix.Text += "\n";
             }
             Stix.Text += "\n \n";
-
-            Stix.Text += "Найденная структура: \n";
-            for (int i = 0; i < phrase.Length; i++) {
-                Stix.Text += GenerateWordBY(phrase[i]) + "\t\t" + phrase[i];
-                Stix.Text += "\n";
-            }
-            //StixMetr(BY);
         }
 
         private string StixMetr(string WordBY)
         {
             char[] Stix = WordBY.ToCharArray();
-            char[] NWStix;
-            string ret = MetrYamb(Stix);
-            if(MetrYamb(Stix) == null)
+            string ret;
+            if(MetrYamb(Stix) != null)
             {
-                //Проверка на хорей
-                if(MetrXorey(Stix) != null)
-                {
-                    ret = MetrXorey(Stix);
-                    return ret;
-                }
+                ret = MetrYamb(Stix);
+                return ret;
             }
-            return ret;
+            //Проверка на хорей
+            else if (MetrXorey(Stix) != null)
+            {
+                ret = MetrXorey(Stix);
+                return ret;
+            }
+            return "Стихотворный метр не найден";
         }
 
         /// <summary>
@@ -258,6 +265,12 @@ namespace Diplom
                 {
           
                     NWStix[i] = 'Б'; NWStix[i + 1] = Stix[i + 1];
+                    i++;
+                }
+                else if (Stix[i] == 'Б' && Stix[i + 1] == 'В')
+                {
+
+                    NWStix[i] = 'Б'; NWStix[i + 1] = 'У';
                     i++;
                 }
                 else if (Stix[i] == 'Б' && (Stix[i + 1] == 'В' || (Stix[i + 1] == 'Б' && Stix[i + 2] != 'У')))
@@ -318,6 +331,12 @@ namespace Diplom
                     i++;
                 }
                 else if (Stix[i] == 'У' && Stix[i + 1] == 'В')
+                {
+
+                    NWStix[i] = 'У'; NWStix[i + 1] = 'Б';
+                    i++;
+                }
+                else if (Stix[i] == 'В' && Stix[i + 1] == 'Б')
                 {
 
                     NWStix[i] = 'У'; NWStix[i + 1] = 'Б';
@@ -776,5 +795,6 @@ namespace Diplom
             AddtoMorph.Owner = this;
             AddtoMorph.Show();
         }
+
     }
 }
