@@ -202,12 +202,13 @@ namespace Diplom
                 Stix.Text += GenerateWordBY(phrase[i]) + "\t\t" + phrase[i];
                 Stix.Text += "\n";
             }
-
             if(otladka.Checked == true) { debug(); }
         }
 
         private void debug()
         {
+            Stix.Text += "\n\n";
+            Stix.Text += "Отладочная информация:\n";
             for (int i = 0; i < Words.Length; i++)
             {
                 Stix.Text += Words[i] + "\t /// ";
@@ -236,9 +237,9 @@ namespace Diplom
                 return ret;
             }
             //Проверка на хорей
-            else if (MetrXorey(Stix) != null)
+            else if (MetrHorey(Stix) != null)
             {
-                ret = MetrXorey(Stix);
+                ret = MetrHorey(Stix);
                 return ret;
             }
             return "Стихотворный метр не найден";
@@ -251,6 +252,7 @@ namespace Diplom
         /// <returns></returns>
         private string MetrYamb(char[] Stix)
         {
+            var Reg = new Regex("\0");
             char[] NWStix = new char[Stix.Length];
             ///////////////Нахождение ямба////////////
             for (int i = 0; i < Stix.Length - 1; i++) //Yamb
@@ -281,8 +283,13 @@ namespace Diplom
                 }
                 else if (Stix[i] == 'В' && Stix[i + 1] == 'В')//Если попалось ВВ то смотрим предидущие или будущие совпадения
                 {
+                    if (i == 0)//В случае если это первая пара то предполагаем что это БУ
+                    {
+                        NWStix[i] = 'Б'; NWStix[i + 1] = 'У';
+                        i++; continue;
+                    }
                     int sovp = 0;
-                    for (int j = 0; j < Stix.Length; j++)//Проход по всей стукрутре в поисках совпадений
+                    for (int j = 0; j < Stix.Length-1; j++)//Проход по всей стукрутре в поисках совпадений
                     {
                         if (Stix[j] == 'Б' && Stix[j + 1] == 'У') //Обычная конструкция по типу БУ
                         {
@@ -295,10 +302,10 @@ namespace Diplom
                     }
                     if (sovp >= 2) { NWStix[i] = 'У'; NWStix[i + 1] = 'Б'; i++; }
                 }
-                else { i++; }//Структуры ямба не было найдено
+                else { continue; }//Структуры ямба не было найдено
             }
             string Yamb = new string(NWStix);
-            Yamb = Yamb.Remove(Yamb.IndexOf('\0')); //Удаление лишних символов
+            Yamb = Reg.Replace(Yamb, "");
             if (Yamb.Contains("БУБУБУБУ"))
             {
                 return  " " + Yamb + " Четырехстопный ямб";
@@ -318,8 +325,9 @@ namespace Diplom
         /// </summary>
         /// <param name="Stix"></param>
         /// <returns></returns>
-        private string MetrXorey(char[] Stix)
+        private string MetrHorey(char[] Stix)
         {
+            var Reg = new Regex("\0");
             char[] NWStix = new char[Stix.Length];
             ///////////////Нахождение ямба////////////
             for (int i = 0; i < Stix.Length - 1; i++) //Yamb
@@ -356,7 +364,7 @@ namespace Diplom
                         i++; continue;
                     }
                     int sovp = 0;
-                    for(int j = 0; j < Stix.Length; j++)//Проход по всей стукрутре в поисках совпадений
+                    for(int j = 0; j < Stix.Length-1; j++)//Проход по всей стукрутре в поисках совпадений
                     {
                         if (Stix[j] == 'У' && Stix[j + 1] == 'Б') //Обычная конструкция по типу УБ
                         {
@@ -372,7 +380,7 @@ namespace Diplom
                 else { i++; }//Структуры хорея не было найдено
             }
             string Xorey = new string(NWStix);
-            if (Xorey.Contains('\0')) { Xorey = Xorey.Remove(Xorey.IndexOf('\0')); } //Удаление лишних символов
+            Xorey = Reg.Replace(Xorey, "");
 
             if (Xorey.Contains("УБУБУБУБ"))
             {
@@ -398,8 +406,11 @@ namespace Diplom
             string[] WordsInPrhase = phrase.Split(' ');
             WordsInPrhase = WordsInPrhase.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             string WordsBY = "";
+          
             for (int i = 0; i < WordsInPrhase.Length; i++)
             {
+                //if (!(WordDictionary[WordsInPrhase[i]].slogs.Length == 1 && WordDictionary[WordsInPrhase[i]].Accent == ""))
+                //{
                     //Перебор по слогам. Так как в разных словах разное кол-во то используем цикл
                     for (int j = 0; j < WordDictionary[WordsInPrhase[i]].slogs.Length; j++)
                     {
@@ -409,20 +420,21 @@ namespace Diplom
                             for (int k = 0; k < WordDictionary[WordsInPrhase[i]].slogs.Length; k++) { WordsBY += "В"; }
                             break;
                         }
-                    try
-                    {
-                        if (WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
+                        try
                         {
-                            WordsBY += "У";
-                        }
+                            if (WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
+                            {
+                                WordsBY += "У";
+                            }
 
-                        if (!WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
-                        {
-                            WordsBY += "Б";
+                            if (!WordDictionary[WordsInPrhase[i]].Accentslogs[j].Contains("'"))
+                            {
+                                WordsBY += "Б";
+                            }
                         }
+                        catch { break; }
                     }
-                    catch { break; }
-                    }
+                //}
             }
             string Metr = StixMetr(WordsBY);
             if(Metr != "") { return WordsBY + "(" + Metr + ")"; }

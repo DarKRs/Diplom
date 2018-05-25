@@ -51,5 +51,10 @@ namespace Diplom
         {
             this.Close();
         }
+
+        private void HelpedText_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

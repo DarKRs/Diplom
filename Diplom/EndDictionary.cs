@@ -21,5 +21,10 @@ namespace Diplom
         {
             this.Close();
         }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

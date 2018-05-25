@@ -45,6 +45,7 @@
             this.HelpedText.Size = new System.Drawing.Size(252, 186);
             this.HelpedText.TabIndex = 1;
             this.HelpedText.Text = resources.GetString("HelpedText.Text");
+            this.HelpedText.TextChanged += new System.EventHandler(this.HelpedText_TextChanged);
             // 
             // button1
             // 
