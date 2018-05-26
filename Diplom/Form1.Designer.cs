@@ -47,6 +47,9 @@
             this.AboutAutorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenSourseText = new System.Windows.Forms.OpenFileDialog();
             this.otladka = new System.Windows.Forms.CheckBox();
+            this.ClearLeft = new System.Windows.Forms.Button();
+            this.ClearRight = new System.Windows.Forms.Button();
+            this.Clear = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -71,7 +74,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(295, 298);
+            this.button2.Location = new System.Drawing.Point(295, 330);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(101, 35);
             this.button2.TabIndex = 2;
@@ -202,18 +205,51 @@
             this.otladka.AutoSize = true;
             this.otladka.Checked = true;
             this.otladka.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.otladka.Location = new System.Drawing.Point(295, 349);
+            this.otladka.Location = new System.Drawing.Point(295, 371);
             this.otladka.Name = "otladka";
             this.otladka.Size = new System.Drawing.Size(106, 30);
             this.otladka.TabIndex = 5;
             this.otladka.Text = "Вывод слогов и\r\nударений";
             this.otladka.UseVisualStyleBackColor = true;
             // 
+            // ClearLeft
+            // 
+            this.ClearLeft.Location = new System.Drawing.Point(295, 125);
+            this.ClearLeft.Name = "ClearLeft";
+            this.ClearLeft.Size = new System.Drawing.Size(101, 45);
+            this.ClearLeft.TabIndex = 6;
+            this.ClearLeft.Text = "Очистить левое \r\nокно";
+            this.ClearLeft.UseVisualStyleBackColor = true;
+            this.ClearLeft.Click += new System.EventHandler(this.ClearLeft_Click);
+            // 
+            // ClearRight
+            // 
+            this.ClearRight.Location = new System.Drawing.Point(295, 227);
+            this.ClearRight.Name = "ClearRight";
+            this.ClearRight.Size = new System.Drawing.Size(101, 45);
+            this.ClearRight.TabIndex = 7;
+            this.ClearRight.Text = "Очистить правое окно";
+            this.ClearRight.UseVisualStyleBackColor = true;
+            this.ClearRight.Click += new System.EventHandler(this.ClearRight_Click);
+            // 
+            // Clear
+            // 
+            this.Clear.Location = new System.Drawing.Point(295, 176);
+            this.Clear.Name = "Clear";
+            this.Clear.Size = new System.Drawing.Size(101, 45);
+            this.Clear.TabIndex = 8;
+            this.Clear.Text = "Очистить оба окна";
+            this.Clear.UseVisualStyleBackColor = true;
+            this.Clear.Click += new System.EventHandler(this.Clear_Click);
+            // 
             // SearchVerse
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1001, 413);
+            this.Controls.Add(this.Clear);
+            this.Controls.Add(this.ClearRight);
+            this.Controls.Add(this.ClearLeft);
             this.Controls.Add(this.otladka);
             this.Controls.Add(this.Stix);
             this.Controls.Add(this.button2);
@@ -251,6 +287,9 @@
         private System.Windows.Forms.ToolStripMenuItem словарьОкончанийРусскогоЯзыкаToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem просмотрToolStripMenuItem;
         private System.Windows.Forms.CheckBox otladka;
+        private System.Windows.Forms.Button ClearLeft;
+        private System.Windows.Forms.Button ClearRight;
+        private System.Windows.Forms.Button Clear;
     }
 }
 

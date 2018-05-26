@@ -24,6 +24,9 @@ namespace Diplom
             Initialization();
         }
 
+        /// <summary>
+        /// Иницилизация. Загрузка словаря ударений и морфологического словаря
+        /// </summary>
         void Initialization()
         {
             var re = new Regex("'"); //Регулярное выражение ударения
@@ -205,6 +208,10 @@ namespace Diplom
             if(otladka.Checked == true) { debug(); }
         }
 
+
+        /// <summary>
+        /// Вывод отладочной информации
+        /// </summary>
         private void debug()
         {
             Stix.Text += "\n\n";
@@ -230,23 +237,32 @@ namespace Diplom
         private string StixMetr(string WordBY)
         {
             char[] Stix = WordBY.ToCharArray();
-            string ret;
-            if(MetrYamb(Stix) != null)
+            string Yamb = MetrYamb(Stix);
+            string Xorey= MetrHorey(Stix);
+            if (Yamb !=null && Yamb.Contains("БУБУБУБУ"))
             {
-                ret = MetrYamb(Stix);
-                return ret;
+                return " " + Yamb + " Четырехстопный ямб";
             }
-            //Проверка на хорей
-            else if (MetrHorey(Stix) != null)
+            else if (Xorey != null && Xorey.Contains("УБУБУБУБ"))
             {
-                ret = MetrHorey(Stix);
-                return ret;
+                return " " + Xorey + " Четырехстопный хорей";
             }
-            return "Стихотворный метр не найден";
+            else if (Yamb != null && Yamb.Contains("БУБУБУ"))
+            {
+                return " " + Yamb + " Трехстопный ямб";
+            }
+            else if (Xorey != null && Xorey.Contains("УБУБУБ"))
+            {
+                return " " + Xorey + " Трехстопный хорей";
+            }
+            else
+            {
+                return "Стихотворный метр не найден";
+            }
         }
 
         /// <summary>
-        /// Проверка на ямб
+        /// Поиск ямбов
         /// </summary>
         /// <param name="Stix"></param>
         /// <returns></returns>
@@ -300,19 +316,15 @@ namespace Diplom
                             sovp++;
                         }
                     }
-                    if (sovp >= 2) { NWStix[i] = 'У'; NWStix[i + 1] = 'Б'; i++; }
+                    if (sovp >= 1) { NWStix[i] = 'Б'; NWStix[i + 1] = 'У'; i++; }
                 }
                 else { continue; }//Структуры ямба не было найдено
             }
             string Yamb = new string(NWStix);
             Yamb = Reg.Replace(Yamb, "");
-            if (Yamb.Contains("БУБУБУБУ"))
+            if (Yamb != "")
             {
-                return  " " + Yamb + " Четырехстопный ямб";
-            }
-            else if (Yamb.Contains("БУБУБУ"))
-            {
-                return " " + Yamb + " Трехстопный ямб";
+                return  Yamb;
             }
             else
             {
@@ -321,7 +333,7 @@ namespace Diplom
         }
 
         /// <summary>
-        /// Проверка на хорей
+        /// Поиск хореев
         /// </summary>
         /// <param name="Stix"></param>
         /// <returns></returns>
@@ -381,14 +393,9 @@ namespace Diplom
             }
             string Xorey = new string(NWStix);
             Xorey = Reg.Replace(Xorey, "");
-
-            if (Xorey.Contains("УБУБУБУБ"))
+            if (Xorey != "")
             {
-                return " " + Xorey + " Четырехстопный хорей";
-            }
-            else if (Xorey.Contains("УБУБУБ"))
-            {
-                return " " + Xorey + " Трехстопный хорей";
+                return Xorey;
             }
             else
             {
@@ -441,6 +448,11 @@ namespace Diplom
             return WordsBY;
         }
 
+        /// <summary>
+        /// Открытие файла/текста
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OpenText_Click(object sender, EventArgs e)
         {
             OpenSourseText.Filter = "Text(*.txt)|*.txt";
@@ -465,8 +477,6 @@ namespace Diplom
                 "Не удалось открыть файл", MessageBoxButtons.OK, MessageBoxIcon.Information); return;
             }
         }
-
-              
 
         ////////Обработка текста.//////////////////
         private string ReplaceNR(string file)
@@ -580,7 +590,13 @@ namespace Diplom
             return word;
         }
 
-
+        /// <summary>
+        /// Удаление K - букв из слова и добавление окончаний из морфологического словаря
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="AccentDictionary"></param>
+        /// <param name="lenght"></param>
+        /// <returns></returns>
         private string DelEndAddAbout(string word, Dictionary<string, string> AccentDictionary, int lenght=1)//Удаление нескольких букв в слове (от 1 до lenght) и проверка по морфологическому словарю
         {
             string NewWord = "";
@@ -678,6 +694,11 @@ namespace Diplom
                
         }
 
+        /// <summary>
+        /// Добавление измененного слова в словарь ударений
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="Accent"></param>
         public void AddAccentToDictionary(string word, string Accent)
         {
             string path = System.IO.Directory.GetCurrentDirectory() + @"\BD\" + "Slovar_udareny.txt";
@@ -777,6 +798,7 @@ namespace Diplom
             ends.Show();
         }
 
+        //Словарь ударений
         private void просмотрToolStripMenuItem2_Click(object sender, EventArgs e)
         {
             accentForm accentForm = new accentForm(WordAccentDictionary);
@@ -784,6 +806,7 @@ namespace Diplom
             accentForm.Show();
         }
         
+        //Добавление ударения пользователем
         private void добавитьФайлLEXGROUPToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Использование делегата для возможности использования функции из дочерней формы AddAccent
@@ -792,6 +815,7 @@ namespace Diplom
             AddaccentForm.Show();
         }
 
+        //Морфологический словарь
         private void просмотрToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             MorphDictionary Morph = new MorphDictionary(lexgroup);
@@ -808,5 +832,23 @@ namespace Diplom
             AddtoMorph.Show();
         }
 
+        ///Очистить левое окно
+        private void ClearLeft_Click(object sender, EventArgs e)
+        {
+            SourseText.Clear();
+        }
+
+        //Очистить правое окно
+        private void ClearRight_Click(object sender, EventArgs e)
+        {
+            Stix.Clear();
+        }
+        
+        //Очистить оба окна
+        private void Clear_Click(object sender, EventArgs e)
+        {
+            SourseText.Clear();
+            Stix.Clear();
+        }
     }
 }

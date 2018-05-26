@@ -29,6 +29,11 @@ namespace Diplom
             this.Close();
         }
 
+        /// <summary>
+        /// Добавление слов введенных пользователем в словарь ударений с помощью делегата
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void AddAccent_Click(object sender, EventArgs e)
         {
             var re = new Regex("'"); //Регулярное выражение ударения
