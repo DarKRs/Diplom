@@ -12,7 +12,7 @@ namespace Diplom
         /////////////////////Формирование "слогов" (Разбиение по гласным)////////////////////////
         public string[] SlogSpliter(string word)
         {
-            string[] glas = { "а", "у", "е", "ё", "ы", "о", "я", "и", "э", "ю" };
+            string[] glas = { "а", "у", "е", "ё", "о", "я", "и", "э", "ю" };
             word = word.ToLower();
 
             List<int> glasIndexes = new List<int>();

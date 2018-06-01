@@ -247,14 +247,15 @@ namespace Diplom
             {
                 return " " + Xorey + " Четырехстопный хорей";
             }
-            else if (Yamb != null && Yamb.Contains("БУБУБУ"))
-            {
-                return " " + Yamb + " Трехстопный ямб";
-            }
             else if (Xorey != null && Xorey.Contains("УБУБУБ"))
             {
                 return " " + Xorey + " Трехстопный хорей";
             }
+            else if (Yamb != null && Yamb.Contains("БУБУБУ"))
+            {
+                return " " + Yamb + " Трехстопный ямб";
+            }
+            
             else
             {
                 return "Стихотворный метр не найден";
@@ -291,7 +292,7 @@ namespace Diplom
                     NWStix[i] = 'Б'; NWStix[i + 1] = 'У';
                     i++;
                 }
-                else if (Stix[i] == 'Б' && (Stix[i + 1] == 'В' || (Stix[i + 1] == 'Б' && Stix[i + 2] != 'У')))
+                else if (i < Stix.Length - 2 && Stix[i] == 'Б' && (Stix[i + 1] == 'В' || (Stix[i + 1] == 'Б' && Stix[i + 2] != 'У')))
                 { //Вариативность конструкции такая как БВ и БББ и ББВ
      
                     NWStix[i] = Stix[i]; NWStix[i + 1] = 'У';
@@ -717,7 +718,7 @@ namespace Diplom
 
         public string[] SlogSpliter(string word)
         {
-            string[] glas = { "а", "у", "е", "ё", "ы", "о", "я", "и", "э", "ю" };
+            string[] glas = { "а", "у", "е", "ё", "о", "я", "и", "э", "ю" };
             word = word.ToLower();
 
             List<int> glasIndexes = new List<int>();
